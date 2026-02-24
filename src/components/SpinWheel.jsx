@@ -92,6 +92,7 @@ export default function SpinWheel({ players, onSpinComplete }) {
 
   useEffect(() => {
     drawWheel(angle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [players, angle]);
 
   function easeOut(t) {

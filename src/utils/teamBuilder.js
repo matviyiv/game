@@ -8,19 +8,20 @@ export function buildWeightedPool(activePlayers, history) {
   const sitOutCounts = {};
   activePlayers.forEach((p) => (sitOutCounts[p.id] = 0));
 
-  // Walk history from most recent backwards
+  // Walk history from most recent backwards.
+  // Once a player plays in a run their streak is broken — freeze their count.
+  const frozen = new Set();
   for (let i = history.length - 1; i >= 0; i--) {
     const run = history[i];
-    if (!run.sitOut) break;
+    if (!run.sitOut) continue;
     run.sitOut.forEach((id) => {
-      if (id in sitOutCounts) sitOutCounts[id]++;
+      if (id in sitOutCounts && !frozen.has(id)) sitOutCounts[id]++;
     });
-    // Only count streaks (stop counting once someone played)
     activePlayers.forEach((p) => {
-      const playedThisRun =
-        run.teams &&
-        run.teams.some((t) => t.includes(p.id));
-      if (playedThisRun) sitOutCounts[p.id] = 0; // reset if they played
+      if (!frozen.has(p.id)) {
+        const playedThisRun = run.teams && run.teams.some((t) => t.includes(p.id));
+        if (playedThisRun) frozen.add(p.id);
+      }
     });
   }
 
@@ -64,7 +65,6 @@ export function assignTeams(activePlayers, history, teamSize = 2) {
   const shuffled = weightedShuffle(weighted);
 
   const numTeams = Math.floor(shuffled.length / teamSize);
-  const sitOutCount = shuffled.length % teamSize;
 
   // Sit-out players are drawn from the END of the weighted shuffle
   // (least-weighted = already played recently = more likely at end after inversion)
