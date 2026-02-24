@@ -65,7 +65,6 @@ export function assignTeams(activePlayers, history, teamSize = 2) {
   const shuffled = weightedShuffle(weighted);
 
   const numTeams = Math.floor(shuffled.length / teamSize);
-  const sitOutCount = shuffled.length % teamSize;
 
   // Sit-out players are drawn from the END of the weighted shuffle
   // (least-weighted = already played recently = more likely at end after inversion)
